@@ -1,4 +1,4 @@
-module github.com/techknowlogick/caddy-s3browser
+module github.com/caddy-plugins/caddy-s3browser
 
 go 1.12
 
