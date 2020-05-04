@@ -144,8 +144,8 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 			// make sure to add folder to parent as well
 			foldersLen := len(folders)
 			for i := 2; i < foldersLen; i++ {
-				parent := getParent(folders, i)
-				folder := getFolder(folders, i)
+				parent := getParent(getFolders(dir), i)
+				folder := getFolder(getFolders(dir), i)
 				if b.Config.Debug {
 					fmt.Printf("folders: %q i: %d parent: %s folder: %s\n", getFolders(dir), i, parent, folder)
 				}
