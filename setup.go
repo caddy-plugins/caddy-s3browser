@@ -230,6 +230,9 @@ func parse(b *Browse, c *caddy.Controller) (err error) {
 			b.Config.Region, err = StringArg(c)
 		case "prefix":
 			b.Config.Prefix, err = StringArg(c)
+			if len(b.Config.Prefix) > 0 {
+				b.Config.Prefix = strings.TrimPrefix(b.Config.Prefix,`/`)
+			}
 		case "cdnurl":
 			b.Config.CDNURL, err = StringArg(c)
 			if len(b.Config.CDNURL) > 0 {
