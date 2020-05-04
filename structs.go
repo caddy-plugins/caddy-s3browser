@@ -8,6 +8,11 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
+type TmplData struct{
+	CDNURL string
+	Directory
+}
+
 type Directory struct {
 	Path    string
 	Folders []Folder

@@ -391,7 +391,7 @@ const defaultTemplate = `<!DOCTYPE html>
 									<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
 								</td>
 								<td class="name">
-									<a href="{{ .Folder }}{{ html .Name }}">
+									<a href="{{ $.CDNURL }}{{ .Folder }}{{ html .Name }}">
 										{{- .Name -}}
 									</a>
 								</td>
