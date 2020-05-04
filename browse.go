@@ -49,7 +49,9 @@ func (b Browse) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	default:
 		if buf, err = b.formatAsHTML(b.Fs[path]); err != nil {
-			fmt.Println(err)
+			if b.Config.Debug {
+				fmt.Println(err)
+			}
 			return http.StatusInternalServerError, err
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
