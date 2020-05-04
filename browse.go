@@ -72,11 +72,6 @@ func (b Browse) formatAsJSON(listing Directory) (*bytes.Buffer, error) {
 
 func (b Browse) formatAsHTML(listing Directory) (*bytes.Buffer, error) {
 	buf := new(bytes.Buffer)
-	b.Template.Funcs(map[string]interface{}{
-		`fileURL`: func(file File) string {
-			return b.Config.CDNURL+file.Folder+file.Name
-		},
-	})
 	err := b.Template.Execute(buf, listing)
 	return buf, err
 }
