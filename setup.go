@@ -81,11 +81,6 @@ func setup(c *caddy.Controller) error {
 	if err != nil {
 		return err
 	}
-	tpl.Funcs(map[string]interface{}{
-		`fileURL`: func(file File) string {
-			return b.Config.CDNURL+file.Folder+file.Name
-		},
-	})
 	b.Template = tpl
 
 	cfg.AddMiddleware(func(next httpserver.Handler) httpserver.Handler {
