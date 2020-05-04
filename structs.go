@@ -30,6 +30,8 @@ type Config struct {
 	Bucket   string
 	Secret   string
 	Region   string
+	Prefix   string
+	CDNURL   string
 	Endpoint string
 	Secure   bool
 	Refresh  string
