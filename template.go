@@ -1,5 +1,7 @@
 package s3browser
 
+import "strings"
+
 type DepCSS []string
 
 func (d DepCSS) String() string {
@@ -21,10 +23,14 @@ var (
 		`//cdn.bootcdn.net/ajax/libs/flat-ui/2.3.0/css/flat-ui.min.css`,
 	}
 
-	Depencies = BootCDN
+	Dependencies = BootCDN
 )
 
-var DefaultTemplate = func() string {
+var DefaultTemplate = func(c Config) string {
+	dependencies := Dependencies
+	if len(c.CSSCDN) > 0 {
+		dependencies = DepCSS(strings.Split(c.CSSCDN, ","))
+	}
 	return `<!DOCTYPE html>
 <html>
 	<head>
@@ -32,7 +38,7 @@ var DefaultTemplate = func() string {
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		` + Depencies.String() + `
+		` + dependencies.String() + `
 		<style>
 			body {
 				cursor: default;
