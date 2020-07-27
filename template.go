@@ -13,23 +13,30 @@ func (d DepCSS) String() string {
 }
 
 var (
-	Cloudflare = DepCSS{
+	cloudflare = DepCSS{
 		`//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css`,
 		`//cdnjs.cloudflare.com/ajax/libs/flat-ui/2.3.0/css/flat-ui.min.css`,
 	}
 
-	BootCDN = DepCSS{
+	bootCDN = DepCSS{
 		`//cdn.bootcdn.net/ajax/libs/flat-ui/2.3.0/css/vendor/bootstrap/css/bootstrap.min.css`,
 		`//cdn.bootcdn.net/ajax/libs/flat-ui/2.3.0/css/flat-ui.min.css`,
 	}
 
-	Dependencies = BootCDN
+	Dependencies = map[string]DepCSS{
+		`cloudflare`: cloudflare,
+		`bootcdn`:    bootCDN,
+	}
 )
 
 var DefaultTemplate = func(c Config) string {
-	dependencies := Dependencies
+	dependencies := bootCDN
 	if len(c.CSSCDN) > 0 {
-		dependencies = DepCSS(strings.Split(c.CSSCDN, ","))
+		if cdn, ok := Dependencies[c.CSSCDN]; ok {
+			dependencies = cdn
+		} else {
+			dependencies = DepCSS(strings.Split(c.CSSCDN, ","))
+		}
 	}
 	return `<!DOCTYPE html>
 <html>
