@@ -57,6 +57,9 @@ var DefaultTemplate = func(c Config) string {
 				padding-left: 15px;
 				padding-right: 15px;
 			}
+			.panel > h1 {
+				margin-top: 0;
+			}
 			th .glyphicon {
 				font-size: 15px;
 			}
