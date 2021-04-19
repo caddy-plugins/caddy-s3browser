@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"net/http"
 	"path"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	"github.com/caddyserver/caddy"
 	"github.com/caddyserver/caddy/caddyhttp/httpserver"
 	"github.com/minio/minio-go/v6"
+	md2html "github.com/russross/blackfriday"
 )
 
 var (
@@ -118,6 +120,23 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 		}
 		minioClient.SetCustomTransport(tr)
 	}
+	parseREADME := func(dir string) (r string) {
+		objectName := strings.TrimPrefix(dir, `/`)
+		f, err := minioClient.GetObject(b.Config.Bucket, objectName, minio.GetObjectOptions{})
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			buf, err := ioutil.ReadAll(f)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				buf = md2html.MarkdownCommon(buf)
+				r = string(buf)
+			}
+			f.Close()
+		}
+		return
+	}
 	findObjects := func(prefix string) {
 		doneCh := make(chan struct{})
 		defer close(doneCh)
@@ -158,13 +177,15 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 						fs[parent] = Directory{
 							Path:    parent,
 							Folders: []Folder{Folder{Name: folder}},
+							README:  parseREADME(parent),
 						}
 					}
 					// check if folder itself exists
 					if _, ok := fs[folder]; !ok {
 						// create parent
 						fs[folder] = Directory{
-							Path: folder,
+							Path:   folder,
+							README: parseREADME(folder),
 						}
 						tmp := fs[parent]
 						tmp.Folders = append(fs[parent].Folders, Folder{Name: folder})
@@ -179,6 +200,7 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 			fsCopy := fs[tempFile.Folder]
 			fsCopy.Path = tempFile.Folder
 			fsCopy.Files = append(fsCopy.Files, tempFile) // adding file list of files
+			fsCopy.README = parseREADME(fsCopy.Path)
 			fs[tempFile.Folder] = fsCopy
 		} // end looping through all the files
 	}

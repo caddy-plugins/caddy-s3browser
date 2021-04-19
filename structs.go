@@ -17,6 +17,7 @@ type Directory struct {
 	Path    string
 	Folders []Folder
 	Files   []File
+	README  string
 }
 
 type Folder struct {
