@@ -1,6 +1,7 @@
 package s3browser
 
 import (
+	"html/template"
 	"path/filepath"
 	"strings"
 	"time"
@@ -65,6 +66,11 @@ func (f File) HumanModTime(format string) string {
 func (d Directory) ReadableName() string {
 	return cleanUp(d.Path)
 }
+
+func (d Directory) RenderREADME() template.HTML {
+	return template.HTML(d.README)
+}
+
 func (f Folder) ReadableName() string {
 	return cleanUp(f.Name)
 }
