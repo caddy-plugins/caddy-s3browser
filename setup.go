@@ -182,15 +182,15 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 						fs[parent] = Directory{
 							Path:    parent,
 							Folders: []Folder{Folder{Name: folder}},
-							README:  parseREADME(parent),
+							//README:  parseREADME(parent),
 						}
 					}
 					// check if folder itself exists
 					if _, ok := fs[folder]; !ok {
 						// create parent
 						fs[folder] = Directory{
-							Path:   folder,
-							README: parseREADME(folder),
+							Path: folder,
+							//README: parseREADME(folder),
 						}
 						tmp := fs[parent]
 						tmp.Folders = append(fs[parent].Folders, Folder{Name: folder})
