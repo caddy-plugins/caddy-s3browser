@@ -122,19 +122,24 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 	}
 	parseREADME := func(dir string) (r string) {
 		objectName := strings.TrimPrefix(dir, `/`)
+		objectName = path.Join(objectName, `README.md`)
 		f, err := minioClient.GetObject(b.Config.Bucket, objectName, minio.GetObjectOptions{})
 		if err != nil {
-			fmt.Println(err)
-		} else {
-			buf, err := ioutil.ReadAll(f)
-			if err != nil {
-				fmt.Println(err)
-			} else {
-				buf = md2html.MarkdownCommon(buf)
-				r = string(buf)
+			if b.Config.Debug && !strings.Contains(err.Error(), ` key does not exist`) {
+				fmt.Println(objectName+`:`, err)
 			}
-			f.Close()
+			return
 		}
+		buf, err := ioutil.ReadAll(f)
+		if err != nil {
+			if b.Config.Debug {
+				fmt.Println(objectName+`:`, err)
+			}
+		} else {
+			buf = md2html.MarkdownCommon(buf)
+			r = string(buf)
+		}
+		f.Close()
 		return
 	}
 	findObjects := func(prefix string) {
