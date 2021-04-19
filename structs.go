@@ -42,6 +42,7 @@ type Config struct {
 	Refresh  string
 	Debug    bool
 	CSSCDN   string
+	prefixes []string
 }
 
 type Node struct {
