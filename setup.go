@@ -2,6 +2,7 @@ package s3browser
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -46,7 +47,8 @@ func setup(c *caddy.Controller) error {
 	b.Fs, err = getFiles(b)
 	if b.Config.Debug {
 		fmt.Println("Files...")
-		fmt.Println(b.Fs)
+		buf, _ := json.MarshalIndent(b.Fs, ``, `  `)
+		fmt.Println(string(buf))
 	}
 	updating = false
 	if err != nil {
