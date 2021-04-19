@@ -120,9 +120,8 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 		}
 		minioClient.SetCustomTransport(tr)
 	}
-	parseREADME := func(dir string) (r string) {
-		objectName := strings.TrimPrefix(dir, `/`)
-		objectName = path.Join(objectName, `README.md`)
+	parseMarkdown := func(objectName string) (r string) {
+		objectName = strings.TrimPrefix(objectName, `/`)
 		f, err := minioClient.GetObject(b.Config.Bucket, objectName, minio.GetObjectOptions{})
 		if err != nil {
 			if b.Config.Debug && !strings.Contains(err.Error(), ` key does not exist`) {
@@ -203,7 +202,10 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 			fsCopy := fs[tempFile.Folder]
 			fsCopy.Path = tempFile.Folder
 			fsCopy.Files = append(fsCopy.Files, tempFile) // adding file list of files
-			fsCopy.README = parseREADME(fsCopy.Path)
+			if file == `README.md` {
+				objectName := path.Join(fsCopy.Path, `README.md`)
+				fsCopy.README = parseMarkdown(objectName)
+			}
 			fs[tempFile.Folder] = fsCopy
 		} // end looping through all the files
 	}
