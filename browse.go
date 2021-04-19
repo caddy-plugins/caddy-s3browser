@@ -37,7 +37,6 @@ func (b Browse) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 			return b.Next.ServeHTTP(w, r)
 		}
 		// 访问未登记的目录返回 not found
-		http.NotFound(w, r)
 		return http.StatusNotFound, nil
 	}
 	switch r.Method {
