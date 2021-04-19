@@ -130,7 +130,7 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 			if len(dir) > 0 && dir[:0] != "/" {
 				dir = "/" + dir
 			}
-			if dir == "" {
+			if len(dir) == 0 {
 				dir = "/" // if dir is empty, then set to root
 			}
 			// Note: dir should start & end with / now
