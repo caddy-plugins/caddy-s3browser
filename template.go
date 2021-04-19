@@ -177,7 +177,7 @@ var DefaultTemplate = func(c Config) string {
 				</table>
 			</div>
 			{{- if .README -}}
-			<div class="panel panel-default">
+			<div class="panel panel-default phl pvl">
 			{{- .RenderREADME -}}
 			</div>
 			{{- end -}}
