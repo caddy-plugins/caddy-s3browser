@@ -60,7 +60,7 @@ var DefaultTemplate = func(c Config) string {
 			.readme-doc > h1 {
 				margin-top: 0;
 			}
-			.readme-doc > img{
+			.readme-doc img{
 				max-width: 100%;
 			}
 			th .glyphicon {
