@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"path"
 	"strconv"
@@ -133,7 +133,7 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 			}
 			return
 		}
-		buf, err := ioutil.ReadAll(f)
+		buf, err := io.ReadAll(f)
 		if err != nil {
 			if b.Config.Debug {
 				fmt.Println(objectName+`:`, err)
@@ -141,6 +141,7 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 		} else {
 			buf = md2html.MarkdownCommon(buf)
 			r = string(buf)
+			r = strings.ReplaceAll(r, `<table>`, `<table class="table table-hover table-striped">`)
 		}
 		f.Close()
 		return
