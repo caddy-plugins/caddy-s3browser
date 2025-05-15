@@ -257,8 +257,17 @@ func parse(b *Browse, c *caddy.Controller) (err error) {
 	b.Config.Secure = true
 	b.Config.Debug = false
 	for c.NextBlock() {
-		var err error
 		switch c.Val() {
+		case "account":
+			if AccountGetter == nil {
+				return c.Errf("Unsupport s3browser arg: %s", c.Val())
+			}
+			var arg string
+			arg, err = StringArg(c)
+			if err != nil {
+				return
+			}
+			b.Config.Account, err = AccountGetter(arg)
 		case "key":
 			b.Config.Key, err = StringArg(c)
 		case "secret":
@@ -269,6 +278,18 @@ func parse(b *Browse, c *caddy.Controller) (err error) {
 			b.Config.Bucket, err = StringArg(c)
 		case "region":
 			b.Config.Region, err = StringArg(c)
+		case "secure":
+			b.Config.Secure, err = BoolArg(c)
+		case "cdnurl":
+			var arg string
+			arg, err = StringArg(c)
+			if err != nil {
+				return
+			}
+			if len(arg) > 0 {
+				b.Config.CDNURL = arg
+			}
+
 		case "prefix":
 			b.Config.Prefix, err = StringArg(c)
 			saved := map[string]struct{}{}
@@ -280,13 +301,6 @@ func parse(b *Browse, c *caddy.Controller) (err error) {
 					saved[prefix] = struct{}{}
 				}
 			}
-		case "cdnurl":
-			b.Config.CDNURL, err = StringArg(c)
-			if len(b.Config.CDNURL) > 0 {
-				b.Config.CDNURL = strings.TrimSuffix(b.Config.CDNURL, `/`)
-			}
-		case "secure":
-			b.Config.Secure, err = BoolArg(c)
 		case "refresh":
 			b.Config.Refresh, err = StringArg(c)
 		case "debug":
@@ -300,6 +314,7 @@ func parse(b *Browse, c *caddy.Controller) (err error) {
 			return err
 		}
 	}
+	b.Config.setDefaults()
 	return nil
 }
 

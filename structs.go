@@ -33,14 +33,8 @@ type File struct {
 }
 
 type Config struct {
-	Key      string
-	Bucket   string
-	Secret   string
-	Region   string
+	Account
 	Prefix   string
-	CDNURL   string
-	Endpoint string
-	Secure   bool
 	Refresh  string
 	Debug    bool
 	CSSCDN   string
