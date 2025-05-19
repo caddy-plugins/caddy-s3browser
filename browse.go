@@ -28,7 +28,6 @@ const (
 )
 
 func (b Browse) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
-
 	path := r.URL.Path
 	if len(path) == 0 {
 		path = "/"
@@ -63,8 +62,12 @@ func (b Browse) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 	}
 	if _, ok := b.Fs[path]; !ok {
 		if !strings.HasSuffix(path, `/`) { // 访问的是文件
-			if len(b.Config.CDNURL) > 0 { // 如果指定了CDN的网址，则跳转到CDN网址
-				endpoint := b.Config.CDNURL + path
+			account, err := b.Config.GetAccount()
+			if err != nil {
+				return http.StatusInternalServerError, err
+			}
+			if len(account.CDNURL) > 0 { // 如果指定了CDN的网址，则跳转到CDN网址
+				endpoint := account.CDNURL + path
 				http.Redirect(w, r, endpoint, http.StatusFound)
 				return http.StatusFound, nil
 			}
@@ -106,7 +109,11 @@ func (b Browse) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 }
 
 func (b Browse) formatAsJSON(listing Directory) (*bytes.Buffer, error) {
-	data := TmplData{CDNURL: b.Config.CDNURL, Directory: listing}
+	account, err := b.Config.GetAccount()
+	if err != nil {
+		return nil, err
+	}
+	data := TmplData{CDNURL: account.CDNURL, Directory: listing}
 	marsh, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -118,8 +125,12 @@ func (b Browse) formatAsJSON(listing Directory) (*bytes.Buffer, error) {
 }
 
 func (b Browse) formatAsHTML(listing Directory) (*bytes.Buffer, error) {
+	account, err := b.Config.GetAccount()
+	if err != nil {
+		return nil, err
+	}
 	buf := new(bytes.Buffer)
-	data := TmplData{CDNURL: b.Config.CDNURL, Directory: listing}
-	err := b.Template.Execute(buf, data)
+	data := TmplData{CDNURL: account.CDNURL, Directory: listing}
+	err = b.Template.Execute(buf, data)
 	return buf, err
 }

@@ -33,12 +33,26 @@ type File struct {
 }
 
 type Config struct {
-	Account
-	Prefix   string
-	Refresh  string
-	Debug    bool
-	CSSCDN   string
-	prefixes []string
+	account       Account
+	Prefix        string
+	Refresh       string
+	Debug         bool
+	CSSCDN        string
+	prefixes      []string
+	accountGetter func(string) (Account, error)
+	accountID     string
+}
+
+func (c *Config) GetAccount() (Account, error) {
+	account := c.account
+	if len(c.accountID) > 0 && c.accountGetter != nil {
+		a, err := c.accountGetter(c.accountID)
+		if err != nil {
+			return account, err
+		}
+		account = a
+	}
+	return account, nil
 }
 
 type Node struct {

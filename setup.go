@@ -108,25 +108,29 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 		minioClient *minio.Client
 		err         error
 	)
+	account, err := b.Config.GetAccount()
+	if err != nil {
+		return fs, err
+	}
 	options := &minio.Options{
-		Creds:  credentials.NewStaticV4(b.Config.Key, b.Config.Secret, ""),
-		Secure: b.Config.Secure,
+		Creds:  credentials.NewStaticV4(account.Key, account.Secret, ""),
+		Secure: account.Secure,
 	}
-	if len(b.Config.Region) > 0 {
-		options.Region = b.Config.Region
+	if len(account.Region) > 0 {
+		options.Region = account.Region
 	}
-	if !b.Config.Secure {
+	if !account.Secure {
 		options.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
-	minioClient, err = minio.New(b.Config.Endpoint, options)
+	minioClient, err = minio.New(account.Endpoint, options)
 	if err != nil {
 		return fs, err
 	}
 	parseMarkdown := func(ctx context.Context, objectName string) (r string) {
 		objectName = strings.TrimPrefix(objectName, `/`)
-		f, err := minioClient.GetObject(ctx, b.Config.Bucket, objectName, minio.GetObjectOptions{})
+		f, err := minioClient.GetObject(ctx, account.Bucket, objectName, minio.GetObjectOptions{})
 		if err != nil {
 			if b.Config.Debug && !strings.Contains(err.Error(), ` key does not exist`) {
 				fmt.Println(objectName+`:`, err)
@@ -149,7 +153,7 @@ func getFiles(b *Browse) (map[string]Directory, error) {
 	findObjects := func(prefix string) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
-		objectCh := minioClient.ListObjects(ctx, b.Config.Bucket, minio.ListObjectsOptions{
+		objectCh := minioClient.ListObjects(ctx, account.Bucket, minio.ListObjectsOptions{
 			Prefix:    prefix,
 			Recursive: true,
 		})
@@ -253,8 +257,9 @@ func getFolder(s []string, i int) string {
 
 func parse(b *Browse, c *caddy.Controller) (err error) {
 	c.RemainingArgs()
-	b.Config = Config{}
-	b.Config.Secure = true
+	b.Config = Config{
+		account: Account{Secure: true},
+	}
 	b.Config.Debug = false
 	for c.NextBlock() {
 		switch c.Val() {
@@ -262,24 +267,23 @@ func parse(b *Browse, c *caddy.Controller) (err error) {
 			if AccountGetter == nil {
 				return c.Errf("Unsupport s3browser arg: %s", c.Val())
 			}
-			var arg string
-			arg, err = StringArg(c)
+			b.Config.accountID, err = StringArg(c)
 			if err != nil {
 				return
 			}
-			b.Config.Account, err = AccountGetter(arg)
+			b.Config.accountGetter = AccountGetter
 		case "key":
-			b.Config.Key, err = StringArg(c)
+			b.Config.account.Key, err = StringArg(c)
 		case "secret":
-			b.Config.Secret, err = StringArg(c)
+			b.Config.account.Secret, err = StringArg(c)
 		case "endpoint":
-			b.Config.Endpoint, err = StringArg(c)
+			b.Config.account.Endpoint, err = StringArg(c)
 		case "bucket":
-			b.Config.Bucket, err = StringArg(c)
+			b.Config.account.Bucket, err = StringArg(c)
 		case "region":
-			b.Config.Region, err = StringArg(c)
+			b.Config.account.Region, err = StringArg(c)
 		case "secure":
-			b.Config.Secure, err = BoolArg(c)
+			b.Config.account.Secure, err = BoolArg(c)
 		case "cdnurl":
 			var arg string
 			arg, err = StringArg(c)
@@ -287,7 +291,7 @@ func parse(b *Browse, c *caddy.Controller) (err error) {
 				return
 			}
 			if len(arg) > 0 {
-				b.Config.CDNURL = arg
+				b.Config.account.CDNURL = arg
 			}
 
 		case "prefix":
@@ -314,7 +318,7 @@ func parse(b *Browse, c *caddy.Controller) (err error) {
 			return err
 		}
 	}
-	b.Config.setDefaults()
+	b.Config.account.setDefaults()
 	return nil
 }
 
